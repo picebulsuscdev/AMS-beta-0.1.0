@@ -27,3 +27,4 @@ This project is a web-based Attendance Monitoring System (AMS) designed for the 
 -   **QR Code Generation & Scanning:** Utilizes libraries like qrcode and qr-scanner for generating and scanning QR codes.
 -   **Data Parsing:** Employs react-papaparse for CSV parsing and CryptoJS for data encryption.
 -   **Deployment:** Designed to be deployed on Cloudflare Pages with Edge runtime support for server-side actions.# AMS-beta-0.1.0
+# AMS-beta-0.1.0

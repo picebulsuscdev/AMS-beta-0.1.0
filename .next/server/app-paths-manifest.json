@@ -6,7 +6,7 @@
   "/admin/page": "app/admin/page.js",
   "/page": "app/page.js",
   "/tracker/page": "app/tracker/page.js",
-  "/onboarding/administrator/page": "app/onboarding/administrator/page.js",
   "/onboarding/page": "app/onboarding/page.js",
+  "/onboarding/administrator/page": "app/onboarding/administrator/page.js",
   "/onboarding/tracker/page": "app/onboarding/tracker/page.js"
 }
