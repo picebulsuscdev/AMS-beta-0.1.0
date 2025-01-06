@@ -1,70 +1,29 @@
-# Getting Started with Create React App
+# PICE BulSU-SC Attendance Monitoring System (AMS)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+This project is a web-based Attendance Monitoring System (AMS) designed for the Philippine Institute of Civil Engineers (PICE) - Bulacan State University Student Chapter (BulSU-SC). It allows for efficient tracking of student attendance at organization events using QR code scanning and provides administrators with tools to manage student data and consolidate attendance records.
 
-In the project directory, you can run:
+## Key Features
 
-### `npm start`
+-   **QR Code Scanning:** Allows officers to quickly register student attendance using QR codes.
+-   **Time Tracking:** Automatically records the time-in and time-out of students.
+-   **Local Data Storage:** Utilizes IndexedDB to store session data locally on the device, ensuring data persistence.
+-   **Admin Dashboard:** Provides tools for administrators to:
+    -   Generate QR codes for a batch of students.
+    -   Consolidate attendance logs from various sources.
+    -   View event overviews and student lists.
+    -   Download attendance data as CSV files.
+-   **Client-Side Data Processing**: Data from QR code scans and CSV files are processed on the client-side, making the system more responsive and efficient.
+-   **Server Actions:** Some operations like creating events are handled by server actions.
+-   **Edge Runtime**: The application is configured to run server-side logic with the Edge runtime, optimized for deployments on platforms like Cloudflare Pages.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Technical Details
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+-   **Framework:** Built using Next.js with the app directory for routing and component structure.
+-   **State Management:** Utilizes React's built-in state management with hooks like useState and useReducer.
+-   **Database:**  Uses IndexedDB for local data storage on the device.
+-   **UI Components:** Utilizes Tailwind CSS with Shadcn UI components for consistent and responsive design.
+-   **QR Code Generation & Scanning:** Utilizes libraries like qrcode and qr-scanner for generating and scanning QR codes.
+-   **Data Parsing:** Employs react-papaparse for CSV parsing and CryptoJS for data encryption.
+-   **Deployment:** Designed to be deployed on Cloudflare Pages with Edge runtime support for server-side actions.# AMS-beta-0.1.0

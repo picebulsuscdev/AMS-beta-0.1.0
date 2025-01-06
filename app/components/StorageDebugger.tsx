@@ -26,12 +26,12 @@ const StorageDebugger = () => {
               const getAllKeys = store.getAllKeys();
 
               getAllKeys.onsuccess = (event) => {
-                const keys = event.target?.result as IDBValidKey[];
+                const keys = (event.target as IDBRequest).result as IDBValidKey[];
 
                 keys.forEach((key) => {
                   const getRequest = store.get(key);
                   getRequest.onsuccess = (event) => {
-                    const item = event.target?.result;
+                    const item = (event.target as IDBRequest).result;
                     if (item) {
                       totalSize += JSON.stringify(item).length;
                       setStorageSize(formatBytes(totalSize));

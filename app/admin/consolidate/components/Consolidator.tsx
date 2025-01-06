@@ -111,7 +111,8 @@ const Consolidator = forwardRef<any, ConsolidatorProps>(
           header: true,
           skipEmptyLines: true,
           transformHeader: (header) => header.trim(),
-        });
+          complete: () => {},
+        }) as any;
         // Check if parsedConsolidation.data exists and has data
         if (
           !parsedConsolidation?.data ||
@@ -143,7 +144,7 @@ const Consolidator = forwardRef<any, ConsolidatorProps>(
 
         // Create a map of students by name
         const studentsMap = new Map<string, Student>(
-          students.map((student) => [student.Name.trim(), student]),
+          students.map((student: Student) => [student.Name.trim(), student]),
         );
 
         console.log("Students Map:", studentsMap);
@@ -158,7 +159,8 @@ const Consolidator = forwardRef<any, ConsolidatorProps>(
             header: true,
             skipEmptyLines: true,
             transformHeader: (header) => header.trim(),
-          });
+            complete: () => {},
+          }) as any;
 
           if (!parsedAttendance?.data || parsedAttendance.data.length === 0) {
             toast.error(`Error parsing attendance log: ${file.name}`);
@@ -189,7 +191,7 @@ const Consolidator = forwardRef<any, ConsolidatorProps>(
           }
 
           console.log("Attendance Header:", Object.keys(records[0] || {}));
-          records.forEach((record) => {
+          records.forEach((record: AttendanceRecord) => {
             const date = record.timeIn
               ? new Date(record.timeIn).toLocaleDateString()
               : "Unknown";

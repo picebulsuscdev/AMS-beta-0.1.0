@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 
 interface AttendanceRecord {
   id: string;
-  userID: string;
+  "User ID": string;
   name: string;
   section: string;
   timeIn?: string;
@@ -36,7 +36,7 @@ const StudentList: React.FC<StudentListProps> = ({
   masterlistSections,
 }) => {
   const [sortColumn, setSortColumn] =
-    useState<keyof AttendanceRecord>("userID");
+    useState<keyof AttendanceRecord>("User ID");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightMissing, setHighlightMissing] = useState<boolean>(false);
@@ -46,7 +46,12 @@ const StudentList: React.FC<StudentListProps> = ({
   const [filterTimeOut, setFilterTimeOut] = useState(false);
   const [filterDidntAttend, setFilterDidntAttend] = useState(false);
 
-  const [filterOptions, setFilterOptions] = useState({
+  const [filterOptions, setFilterOptions] = useState<{
+    selectedSections: string[];
+    filterTimeIn: boolean;
+    filterTimeOut: boolean;
+    filterDidntAttend: boolean;
+  }>({
     selectedSections: [],
     filterTimeIn: false,
     filterTimeOut: false,
@@ -57,6 +62,25 @@ const StudentList: React.FC<StudentListProps> = ({
     AttendanceRecord[]
   >([]);
 
+    const sortRecords = useCallback(
+        (
+            data: AttendanceRecord[],
+            column: keyof AttendanceRecord,
+            direction: "asc" | "desc",
+        ): AttendanceRecord[] => {
+            return [...data].sort((a, b) => {
+                const aValue = a[column] == null ? "" : String(a[column]);
+                const bValue = b[column] == null ? "" : String(b[column]);
+
+                if (aValue < bValue) return direction === "asc" ? -1 : 1;
+                if (aValue > bValue) return direction === "asc" ? 1 : -1;
+                return 0;
+            });
+        },
+        [],
+    );
+
+
   // Update attendance records and apply default sorting
   useEffect(() => {
     const recordsWithHighlightClass = allAttendanceRecords.map((record) => ({
@@ -64,29 +88,13 @@ const StudentList: React.FC<StudentListProps> = ({
       highlightClass: getRowHighlightClass(record, highlightMissing),
       isMissing: getIsMissing(record),
     }));
-    setAttendanceRecords(
-      [...recordsWithHighlightClass].sort((a, b) =>
-        a.userID.localeCompare(b.userID),
-      ),
-    );
-  }, [allAttendanceRecords, highlightMissing]);
 
-  const sortRecords = useCallback(
-    (
-      data: AttendanceRecord[],
-      column: keyof AttendanceRecord,
-      direction: "asc" | "desc",
-    ): AttendanceRecord[] => {
-      return [...data].sort((a, b) => {
-        const aValue = a[column] || "";
-        const bValue = b[column] || "";
-        if (aValue < bValue) return direction === "asc" ? -1 : 1;
-        if (aValue > bValue) return direction === "asc" ? 1 : -1;
-        return 0;
-      });
-    },
-    [],
-  );
+      setAttendanceRecords(
+        sortRecords(recordsWithHighlightClass, "User ID", "asc")
+      );
+  }, [allAttendanceRecords, highlightMissing, sortRecords]);
+
+
 
   const handleSort = (column: keyof AttendanceRecord) => {
     const newDirection =
@@ -404,10 +412,10 @@ const StudentList: React.FC<StudentListProps> = ({
                 <Button
                   variant="link"
                   className="flex items-center justify-center w-full h-full"
-                  onClick={() => handleSort("userID")}
+                  onClick={() => handleSort("User ID")}
                 >
                   User ID
-                  {sortColumn === "userID" ? (
+                  {sortColumn === "User ID" ? (
                     sortDirection === "asc" ? (
                       <ArrowUp className="ml-1 h-4 w-4" />
                     ) : (
@@ -502,7 +510,7 @@ const StudentList: React.FC<StudentListProps> = ({
             ) : (
               filteredRecords.map((record) => (
                 <tr key={record.id} className={record.highlightClass}>
-                  <td className="text-center py-2 px-3">{record.userID}</td>
+                  <td className="text-center py-2 px-3">{record["User ID"]}</td>
                   <td className="text-left py-2 px-3">{record.name}</td>
                   <td className="text-center py-2 px-3">{record.section}</td>
                   <td className="text-center py-2 px-3">{record.timeIn}</td>

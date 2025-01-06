@@ -17,6 +17,8 @@ interface EventData {
   description: string;
 }
 
+export const runtime = "edge"; // Add this line
+
 export async function recordAttendance(data: {
   eventId: string;
   memberId: string;

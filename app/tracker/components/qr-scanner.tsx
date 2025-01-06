@@ -31,7 +31,7 @@ const QRScanner = forwardRef<
   QRScannerProps
 >(({ eventId, onScanSuccess }, ref) => {
   const [isScanning, setIsScanning] = useState(false);
-  const [hasCamera, setHasCamera] = useState<boolean | null>(null);
+  const [hasCamera, setHasCamera] = useState<true | false | null>(null);
   const [isTimeIn, setIsTimeIn] = useState<boolean>(true); // Default to true, loaded from indexedDB
   const [isMounted, setIsMounted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -199,28 +199,28 @@ const QRScanner = forwardRef<
     return null;
   }
 
-  if (hasCamera === null) {
+  if (hasCamera !== true) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center p-6">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <CardContent className="p-6 text-center">
+          {hasCamera === null ? (
+            <>
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                Checking camera availability...
+              </p>
+            </>
+          ) : (
+            <p className="text-muted-foreground">
+              Please ensure you have a working camera and have granted camera
+              permissions to use the QR scanner.
+            </p>
+          )}
         </CardContent>
       </Card>
     );
   }
 
-  if (hasCamera === false) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">
-            Please ensure you have a working camera and have granted camera
-            permissions to use the QR scanner.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="overflow-hidden">
@@ -249,9 +249,8 @@ const QRScanner = forwardRef<
           <div className="relative aspect-square max-w-sm mx-auto overflow-hidden rounded-lg border-2">
             {/* Default UI with camera icon and instruction */}
             <div
-              className={`absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full border-2 border-dashed transition-opacity ${
-                isScanning ? "opacity-0 pointer-events-none" : "opacity-100"
-              }`}
+              className={`absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full border-2 border-dashed transition-opacity ${isScanning ? "opacity-0 pointer-events-none" : "opacity-100"
+                }`}
             >
               <Camera className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground text-center px-4">
@@ -262,9 +261,8 @@ const QRScanner = forwardRef<
             {/* QR Scanner */}
             <video
               ref={videoRef}
-              className={`${
-                isScanning ? "opacity-100" : "opacity-0 pointer-events-none"
-              } absolute top-0 left-0 w-full h-full object-cover transition-opacity`}
+              className={`${isScanning ? "opacity-100" : "opacity-0 pointer-events-none"
+                } absolute top-0 left-0 w-full h-full object-cover transition-opacity`}
               playsInline
             />
           </div>
@@ -275,7 +273,7 @@ const QRScanner = forwardRef<
               onClick={isScanning ? stopScanning : startScanning}
               className="w-full"
               variant={isScanning ? "secondary" : "default"}
-              disabled={!isMounted || hasCamera === null || hasCamera === false}
+              disabled={!isMounted || hasCamera !== true} // ✅ Fixed Type Check Here
             >
               {isScanning ? (
                 <>
@@ -290,6 +288,7 @@ const QRScanner = forwardRef<
               )}
             </Button>
           </div>
+
 
           {/* Mode indicator badges */}
           <div className="flex items-center gap-2">

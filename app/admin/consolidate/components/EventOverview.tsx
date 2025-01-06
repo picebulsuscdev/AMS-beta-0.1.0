@@ -55,10 +55,10 @@ const EventOverview: React.FC<EventOverviewProps> = ({ consolidatedData }) => {
               const [numA, charA] = parseSection(sectionA);
               const [numB, charB] = parseSection(sectionB);
 
-              if (numA !== numB) {
+              if (typeof numA === 'number' && typeof numB === 'number' && numA !== numB) {
                 return direction === "asc" ? numA - numB : numB - numA;
               }
-              if (charA !== charB) {
+              if (typeof charA === 'string' && typeof charB === 'string' && charA !== charB) {
                 return direction === "asc"
                   ? charA.localeCompare(charB)
                   : charB.localeCompare(charA);

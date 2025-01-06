@@ -2,28 +2,33 @@
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
+import { Button } from "components/ui/button";
 import { ArrowLeft, HelpCircle, Download, Loader2, Edit } from "lucide-react";
 import FileDropZone from "./components/FileDropZone";
 import AttendanceFileDropZone from "./components/AttendanceFileDropZone";
 import Consolidator from "./components/Consolidator";
 import SummaryTabs from "./components/SummaryTabs";
-import { Input } from "@/components/ui/input";
+import { Input } from "components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { useCheckAdminAuthentication } from "@/utils/auth";
+} from "components/ui/dialog";
+import { useCheckAdminAuthentication } from "utils/auth";
 import { toast } from "sonner";
 
 interface Student {
   id: string;
   name: string;
   section: string;
+}
+
+interface ConsolidatedData {
+  sections: { [key: string]: ConsolidatedSection };
+  dates: string[];
 }
 
 interface AttendanceRecord {
@@ -40,8 +45,8 @@ interface ConsolidatedSection {
   totalStudents: number;
   students: {
     name: string;
-    timeIn?: string;
-    timeOut?: string;
+    timeIn?: string | null;
+    timeOut?: string | null;
     userID?: string;
   }[];
   timeInCount: number;
@@ -49,21 +54,19 @@ interface ConsolidatedSection {
   [key: string]: any;
 }
 
-interface ConsolidatedData {
-  sections: { [key: string]: ConsolidatedSection };
-  dates: string[];
-}
-
 export default function ConsolidatePage() {
   const authStatus = useCheckAdminAuthentication();
   const router = useRouter();
+
   useEffect(() => {
     if (authStatus === "unauthenticated") {
       toast.error("Session expired. Please login again.");
       router.push("/admin");
     }
   }, [authStatus, router]);
+
   const [eventName, setEventName] = useState("");
+  const [tempEventName, setTempEventName] = useState(""); // Temporary state for the modal input
   const [consolidationFile, setConsolidationFile] = useState<File | null>(null);
   const [attendanceFiles, setAttendanceFiles] = useState<File[]>([]);
   const [consolidated, setConsolidated] = useState<ConsolidatedData | null>(
@@ -80,12 +83,14 @@ export default function ConsolidatePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSections, setFilteredSections] = useState<
     { [key: string]: ConsolidatedSection } | {}
-  >({}); // Initialize as empty object
+  >({});
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [sortColumn, setSortColumn] = useState<"section">("section");
-  const [isEventNameModalOpen, setIsEventNameModalOpen] = useState(true); // Modal open state
+  const [isEventNameModalOpen, setIsEventNameModalOpen] = useState(true);
   const consolidatorRef = useRef<any>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
 
   const handleConsolidationFileSelected = (file: File) => {
     setConsolidationFile(file);
@@ -112,19 +117,28 @@ export default function ConsolidatePage() {
       setAllAttendanceRecords([]);
       setConsolidated(data);
       if (data) {
-        const allRecords = Object.values(data.sections).flatMap((section) => {
-          return section.students.map((student) => ({
-            id: crypto.randomUUID(),
-            userID: student.userID!, // Use the userID from the consolidation file
-            name: student.name,
-            section:
-              Object.keys(data.sections).find(
-                (key) => data.sections[key] === section,
-              ) || "",
-            timeIn: student.timeIn,
-            timeOut: student.timeOut,
-          }));
-        });
+        const allRecords = Object.values(data.sections).flatMap(
+          (section: ConsolidatedSection) => {
+            return section.students.map(
+              (student: {
+                userID?: string;
+                name: string;
+                timeIn?: string | null;
+                timeOut?: string | null;
+              }) => ({
+                id: crypto.randomUUID(),
+                "User ID": student.userID!,
+                name: student.name,
+                section:
+                  Object.keys(data.sections).find(
+                    (key) => data.sections[key] === section,
+                  ) || "",
+                timeIn: student.timeIn ?? undefined,
+                timeOut: student.timeOut ?? undefined,
+              }),
+            ) as AttendanceRecord[];
+          },
+        );
         setAllAttendanceRecords(allRecords);
       }
     },
@@ -139,23 +153,32 @@ export default function ConsolidatePage() {
     try {
       const csv = [
         ["User ID", "Name", "Section", "Time In", "Time Out"],
-        ...Object.entries(consolidated.sections).flatMap(([, data]) => {
-          return data.students
-            .sort((a, b) => {
-              const numA = parseInt(a.userID || "0", 10);
-              const numB = parseInt(b.userID || "0", 10);
-              return numA - numB;
-            })
-            .map((student) => [
-              student.userID || "",
-              student.name,
-              Object.keys(consolidated.sections).find((key) =>
-                consolidated.sections[key].students.includes(student),
-              ) || "",
-              student.timeIn || "",
-              student.timeOut || "",
-            ]);
-        }),
+        ...Object.entries(consolidated.sections).flatMap(
+          ([, data]: [string, ConsolidatedSection]) => {
+            return data.students
+              .sort((a: { userID?: string }, b: { userID?: string }) => {
+                const numA = parseInt(a.userID || "0", 10);
+                const numB = parseInt(b.userID || "0", 10);
+                return numA - numB;
+              })
+              .map(
+                (student: {
+                  userID?: string;
+                  name: string;
+                  timeIn?: string | null;
+                  timeOut?: string | null;
+                }) => [
+                  student.userID || "",
+                  student.name,
+                  Object.keys(consolidated.sections).find((key) =>
+                    consolidated.sections[key].students.includes(student),
+                  ) || "",
+                  student.timeIn ?? "",
+                  student.timeOut ?? "",
+                ],
+              );
+          },
+        ),
       ]
         .map((row) => row.join(","))
         .join("\n");
@@ -180,6 +203,7 @@ export default function ConsolidatePage() {
       setIsDownloading(false);
     }
   };
+
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -195,18 +219,20 @@ export default function ConsolidatePage() {
     const filtered: { [key: string]: ConsolidatedSection } = {};
 
     if (consolidated?.sections) {
-      Object.entries(consolidated.sections).forEach(([section, data]) => {
-        const filteredStudents = data.students.filter((student) =>
-          student.name.toLowerCase().includes(query.toLowerCase()),
-        );
-        if (filteredStudents.length > 0) {
-          filtered[section] = {
-            ...data,
-            students: filteredStudents,
-            totalStudents: filteredStudents.length,
-          };
-        }
-      });
+      Object.entries(consolidated.sections).forEach(
+        ([section, data]: [string, ConsolidatedSection]) => {
+          const filteredStudents = data.students.filter((student: {
+            name: string;
+          }) => student.name.toLowerCase().includes(query.toLowerCase()));
+          if (filteredStudents.length > 0) {
+            filtered[section] = {
+              ...data,
+              students: filteredStudents,
+              totalStudents: filteredStudents.length,
+            };
+          }
+        },
+      );
     }
     setFilteredSections(filtered);
   };
@@ -222,6 +248,7 @@ export default function ConsolidatePage() {
   const getDisplaySections = () => {
     return consolidated?.sections || {};
   };
+
   const handleSort = (column: "section") => {
     if (sortColumn === column) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -230,6 +257,7 @@ export default function ConsolidatePage() {
       setSortOrder("asc");
     }
   };
+
   const sortSections = (sections: {
     [key: string]: ConsolidatedSection;
   }): [string, ConsolidatedSection][] => {
@@ -247,6 +275,7 @@ export default function ConsolidatePage() {
       return 0;
     });
   };
+
   const handleConsolidateClick = useCallback(() => {
     console.log("Button clicked");
     if (consolidatorRef.current) {
@@ -254,17 +283,42 @@ export default function ConsolidatePage() {
       consolidatorRef.current.consolidateFiles();
     }
   }, []);
+
   const getMasterlistSections = useMemo(() => {
     if (!consolidated?.sections) return [];
     return Object.keys(consolidated?.sections);
   }, [consolidated]);
-  const handleEventNameSubmit = (value: string) => {
-    setEventName(value);
-    setIsEventNameModalOpen(false);
-  };
+
+
+    const handleEventNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTempEventName(event.target.value);
+    };
+
+    const handleEventNameSubmit = () => {
+        setEventName(tempEventName);
+        setIsEventNameModalOpen(false);
+    };
+
+
   const handleEditEventName = () => {
+    setTempEventName(eventName); // Set the current event name as the initial value in the input
     setIsEventNameModalOpen(true);
+    if (inputRef.current){
+         setTimeout(() => {
+            inputRef.current?.focus()
+        }, 0)
+    }
   };
+
+    useEffect(() => {
+    if (isEventNameModalOpen && inputRef.current) {
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 0);
+    }
+    }, [isEventNameModalOpen]);
+
+
   return (
     <div className="container mx-auto p-4 h-screen flex flex-col">
       <div className="flex items-center justify-between mb-6">
@@ -297,6 +351,7 @@ export default function ConsolidatePage() {
                 file={consolidationFile}
                 onFileSelected={handleConsolidationFileSelected}
                 onRemove={handleRemoveConsolidationFile}
+                title="Consolidation File"
               />
             </CardContent>
           </Card>
@@ -309,6 +364,7 @@ export default function ConsolidatePage() {
                 files={attendanceFiles}
                 onFilesSelected={handleAttendanceFilesSelected}
                 onRemove={handleRemoveAttendanceFile}
+                title="Attendance Logs"
               />
             </CardContent>
           </Card>
@@ -381,7 +437,7 @@ export default function ConsolidatePage() {
           </Card>
         </div>
       </div>
-      {/* Event Name Modal */}
+         {/* Event Name Modal */}
       <Dialog
         open={isEventNameModalOpen}
         onOpenChange={setIsEventNameModalOpen}
@@ -396,12 +452,15 @@ export default function ConsolidatePage() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Input
+                  ref={inputRef}
                 type="text"
                 placeholder="Enter event name"
                 className="text-lg"
-                onKeyDown={(e) => {
+                value={tempEventName}
+                onChange={handleEventNameChange}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === "Enter") {
-                    handleEventNameSubmit(e.currentTarget.value);
+                    handleEventNameSubmit();
                   }
                 }}
               />
@@ -409,11 +468,7 @@ export default function ConsolidatePage() {
             <div className="mt-4 flex justify-end">
               <Button
                 variant="outline"
-                onClick={() =>
-                  handleEventNameSubmit(
-                    document.querySelector("input")?.value || "",
-                  )
-                }
+                onClick={handleEventNameSubmit}
               >
                 Apply
               </Button>

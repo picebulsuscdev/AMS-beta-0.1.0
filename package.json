@@ -13,7 +13,6 @@
     "@radix-ui/react-switch": "^1.0.0",
     "@radix-ui/react-tabs": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.6",
-    "@react-aria/accordion": "^3.0.0-alpha.36",
     "@react-aria/disclosure": "^3.0.0",
     "@zxing/browser": "^0.1.5",
     "class-variance-authority": "^0.7.0",
@@ -24,6 +23,7 @@
     "jspdf": "^2.5.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.294.0",
+    "package.json": "^2.0.1",
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
@@ -43,7 +43,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "strict-dev": "npm run lint && npm run type-check && npm run dev"
+    "strict-dev": "npm run lint && npm run type-check && npm run dev",
+    "pages:build": "npx @cloudflare/next-on-pages"
   },
   "browserslist": {
     "production": [
@@ -58,8 +59,11 @@
     ]
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.7",
     "@types/crypto-js": "^4.2.1",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20.10.0",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^8.19.0",
