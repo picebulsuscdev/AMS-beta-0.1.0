@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST='{"node_modules/qr-scanner/qr-scanner.min.js -> ./qr-scanner-worker.min.js":{"id":13922,"files":["static/chunks/922.dd635f38e84e1d71.js"]}}';
