@@ -6,9 +6,9 @@ import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navItems = [
-  { href: "/docs", label: "Introduction" },
-  { href: "/docs/tracker", label: "Tracker" },
-  { href: "/docs/administrator", label: "Administrator" },
+  { href: "/onboarding", label: "Introduction" },
+  { href: "/onboarding/tracker", label: "Tracker" },
+  { href: "/onboarding/administrator", label: "Administrator" },
 ];
 
 export function SidePanel() {
