@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description: "Track student attendance efficiently with our PICE BulSU-SC AMS.",
     images: [
       {
-        url: "/web/ogt.png", // Path to your preview image
+        url: "https://picebulsusc.pages.dev/web/ogt.png", // Path to your preview image
         width: 1200, // Specify width
         height: 630, // Specify height
         alt: "PICE BulSU-SC Attendance Monitoring System", // Optional alt text
