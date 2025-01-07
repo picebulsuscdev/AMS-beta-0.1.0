@@ -70,7 +70,7 @@ export default function IntroductionPage() {
             you may access it here:
           </p>
           <a
-            href="YOUR_GITHUB_URL"
+            href="./"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 underline hover:text-blue-700 transition duration-300 block mt-2"
