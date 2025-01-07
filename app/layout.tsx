@@ -10,11 +10,19 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PICE BulSU-SC Attendance Monitoring System",
     description: "Track student attendance efficiently with our PICE BulSU-SC AMS.",
-    images: ["/web/ogt.png"], // Path to your preview image
+    images: [
+      {
+        url: "/web/ogt.png", // Path to your preview image
+        width: 1200, // Specify width
+        height: 630, // Specify height
+        alt: "PICE BulSU-SC Attendance Monitoring System", // Optional alt text
+      },
+    ],
     siteName: "PICE BulSU-SC AMS",
     type: "website",
   },
 };
+
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
