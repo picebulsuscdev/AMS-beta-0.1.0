@@ -7,6 +7,13 @@ import { Toaster } from "sonner"; // Import the Toaster component
 export const metadata: Metadata = {
   title: "PICE BulSU-SC AMS",
   description: "Attendance Management System for PICE",
+  openGraph: {
+    title: "PICE BulSU-SC Attendance Monitoring System",
+    description: "Track student attendance efficiently with our PICE BulSU-SC AMS.",
+    images: ["/web/ogt.png"], // Path to your preview image
+    siteName: "PICE BulSU-SC AMS",
+    type: "website",
+  },
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
