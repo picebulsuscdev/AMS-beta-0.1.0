@@ -94,7 +94,6 @@ export default function ScannerPage() {
         );
 
         if (!trackerInfo) {
-          console.error("No tracker info found. Redirecting to /");
           toast.error(
             "No tracker info found. Redirecting to registration page.",
           );
@@ -146,10 +145,7 @@ export default function ScannerPage() {
     }
   };
 
-  const handleScanSuccess = async (data: {
-    code: string;
-    type: "in" | "out";
-  }) => {
+  const handleScanSuccess = async (data: { code: string; type: "in" | "out" }) => {
     try {
       const decodedData = decryptHash(data.code);
       if (!decodedData) {
@@ -158,6 +154,7 @@ export default function ScannerPage() {
         return;
       }
 
+      // Generate a new scan record
       const newScan: ScanRecord = {
         id: Date.now().toString(),
         userID: decodedData.userID,
@@ -167,40 +164,25 @@ export default function ScannerPage() {
         type: data.type,
       };
 
+      // Add the new scan record directly to IndexedDB
+      await addItem("scans", newScan);  // Store it in "scans" (not used in attendance directly)
+
+      // Add the scan directly to the "attendance" store (without conditions)
+      const newAttendanceRecord: AttendanceRecord = {
+        id: newScan.id, // Using scan id as attendance id (or you can use userID, but using id from scan for simplicity)
+        userID: decodedData.userID,
+        name: decodedData.name,
+        section: decodedData.section,
+        timeIn: data.type === "in" ? newScan.timestamp : undefined,
+        timeOut: data.type === "out" ? newScan.timestamp : undefined,
+      };
+
+      await addItem("attendance", newAttendanceRecord);  // Save directly to "attendance"
+
+      // Update recent scans state to show the latest scans in the UI
       setRecentScans((prevScans) => [newScan, ...prevScans].slice(0, 5));
 
-      await addItem("scans", newScan);
-
-      const attendanceId = `${decodedData.userID}-${new Date().toLocaleDateString()}`;
-      const existingRecord = attendanceRecords.find(
-        (record) => record.id === attendanceId,
-      );
-
-      if (existingRecord) {
-        const updatedRecord = {
-          ...existingRecord,
-          [data.type === "in" ? "timeIn" : "timeOut"]: newScan.timestamp,
-        };
-
-        setAttendanceRecords((prevRecords) =>
-          prevRecords.map((record) =>
-            record.id === attendanceId ? updatedRecord : record,
-          ),
-        );
-        await addItem("attendance", updatedRecord);
-      } else {
-        const newRecord: AttendanceRecord = {
-          id: attendanceId,
-          userID: decodedData.userID,
-          name: decodedData.name,
-          section: decodedData.section,
-          [data.type === "in" ? "timeIn" : "timeOut"]: newScan.timestamp,
-        };
-
-        setAttendanceRecords((prevRecords) => [...prevRecords, newRecord]);
-        await addItem("attendance", newRecord);
-      }
-
+      // Play success sound and show toast message
       playSuccessSound();
       toast.success(`Successfully scanned: ${decodedData.name}`);
     } catch (error) {
@@ -209,6 +191,10 @@ export default function ScannerPage() {
       playErrorSound();
     }
   };
+
+
+
+
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

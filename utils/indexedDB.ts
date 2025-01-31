@@ -39,33 +39,44 @@ export async function initDB(): Promise<void> {
 }
 
 export async function addItem(storeName: string, data: any): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (!db) {
-      reject("Database not initialized");
-      return;
+      await initDB(); // Ensure DB is initialized
     }
 
-    const transaction = db.transaction(storeName, "readwrite");
+    const transaction = db!.transaction(storeName, "readwrite");
     const store = transaction.objectStore(storeName);
 
-    // Ensure the data has an 'id' field
+    // Use timestamp or unique identifiers to ensure uniqueness.
     if (!data.id) {
       data.id = Date.now().toString();
     }
 
-    const request = store.put(data);
+    const existingRecordRequest = store.get(data.id);
 
-    request.onsuccess = () => {
-      console.log("Data successfully added to IndexedDB:", data);
+    existingRecordRequest.onsuccess = () => {
+      const existingData = existingRecordRequest.result;
+
+      if (existingData) {
+        // Merge new data with existing data
+        const mergedData = { ...existingData, ...data };
+        store.put(mergedData);
+      } else {
+        store.put(data);
+      }
+
+      console.log("Data successfully added/updated in IndexedDB:", data);
       window.postMessage({ type: "indexedDB_change" }, window.location.origin);
       resolve();
     };
-    request.onerror = (event) => {
-      console.error(`Error adding item to ${storeName}:`, event);
-      reject(`Failed to add item to ${storeName}`);
+
+    existingRecordRequest.onerror = (event) => {
+      console.error(`Error fetching existing item from ${storeName}:`, event);
+      reject(`Failed to fetch existing item from ${storeName}`);
     };
   });
 }
+
 
 export async function getAllItems(storeName: string): Promise<any[]> {
   return new Promise((resolve, reject) => {
