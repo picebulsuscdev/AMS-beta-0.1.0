@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Download, ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { initDB, getAllItems } from "@/utils/indexedDB";
 import { useMediaQuery } from "usehooks-ts";
 import { toast } from "sonner";
@@ -171,10 +170,8 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
-      <ScrollArea className="w-full">
-        <table
-          className={`table-auto w-full text-sm ${isMobile ? "min-w-[600px]" : ""}`}
-        >
+      <div className="overflow-x-auto">
+        <table className="table-auto w-full text-sm">
           <thead>
             <tr>
               <th className="text-left">
@@ -273,7 +270,7 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
             )}
           </tbody>
         </table>
-      </ScrollArea>
+      </div>
       <div className="mt-4 flex justify-end space-x-2">
         <Button
           variant="outline"
