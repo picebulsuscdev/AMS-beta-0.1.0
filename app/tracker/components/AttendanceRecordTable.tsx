@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Download, ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,10 +99,11 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
   const getFilteredRecords = () => {
     if (!attendanceRecords) return [];
     return attendanceRecords.filter((record) => {
-      if (!record || !record.name || !record.section) return false;
+      if (!record || !record.name || !record.section || !record.userID) return false;
       return (
         record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        record.section.toLowerCase().includes(searchQuery.toLowerCase())
+        record.section.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        record.userID.toLowerCase().includes(searchQuery.toLowerCase())
       );
     });
   };
@@ -166,18 +167,37 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
     <div className="space-y-4">
       <Input
         type="text"
-        placeholder="Search by Name or Section"
+        placeholder="Search by User ID, Name, or Section"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
-      <div className="overflow-x-auto">
-        <table className="table-auto w-full text-sm">
-          <thead>
+      <div className="border border-gray-200 rounded-md overflow-hidden overflow-x-auto">
+        <table className="table-auto w-full text-sm border-collapse">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            {/* Table Headers */}
             <tr>
-              <th className="text-left">
+              <th className="text-center py-2 px-3">
                 <Button
                   variant="link"
-                  className="flex items-center"
+                  className="flex items-center justify-center w-full h-full"
+                  onClick={() => handleSort("userID")}
+                >
+                  User ID
+                  {sortColumn === "userID" ? (
+                    sortDirection === "asc" ? (
+                      <ArrowUp className="ml-1 h-4 w-4" />
+                    ) : (
+                      <ArrowDown className="ml-1 h-4 w-4" />
+                    )
+                  ) : (
+                    <ArrowUpDown className="ml-1 h-4 w-4" />
+                  )}
+                </Button>
+              </th>
+              <th className="text-center py-2 px-3">
+                <Button
+                  variant="link"
+                  className="flex items-center justify-center w-full h-full"
                   onClick={() => handleSort("name")}
                 >
                   Name
@@ -192,10 +212,10 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
                   )}
                 </Button>
               </th>
-              <th className="text-left">
+              <th className="text-center py-2 px-3">
                 <Button
                   variant="link"
-                  className="flex items-center"
+                  className="flex items-center justify-center w-full h-full"
                   onClick={() => handleSort("section")}
                 >
                   Section
@@ -210,10 +230,10 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
                   )}
                 </Button>
               </th>
-              <th className="text-left">
+              <th className="text-center py-2 px-3">
                 <Button
                   variant="link"
-                  className="flex items-center"
+                  className="flex items-center justify-center w-full h-full"
                   onClick={() => handleSort("timeIn")}
                 >
                   Time In ({timeInCount})
@@ -228,10 +248,10 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
                   )}
                 </Button>
               </th>
-              <th className="text-left">
+              <th className="text-center py-2 px-3">
                 <Button
                   variant="link"
-                  className="flex items-center"
+                  className="flex items-center justify-center w-full h-full"
                   onClick={() => handleSort("timeOut")}
                 >
                   Time Out ({timeOutCount})
@@ -251,20 +271,18 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
           <tbody>
             {getFilteredRecords().length === 0 ? (
               <tr>
-                <td
-                  colSpan={4}
-                  className="text-center py-4 text-muted-foreground"
-                >
-                  No records found
+                <td colSpan={5} className="px-4 py-2 text-center text-gray-500">
+                  No data to display yet
                 </td>
               </tr>
             ) : (
               sortedRecords.map((record) => (
                 <tr key={record.id}>
-                  <td>{record.name}</td>
-                  <td>{record.section}</td>
-                  <td>{record.timeIn}</td>
-                  <td>{record.timeOut}</td>
+                  <td className="text-center py-2 px-3">{record.userID}</td>
+                  <td className="text-left py-2 px-3">{record.name}</td>
+                  <td className="text-center py-2 px-3">{record.section}</td>
+                  <td className="text-center py-2 px-3">{record.timeIn}</td>
+                  <td className="text-center py-2 px-3">{record.timeOut}</td>
                 </tr>
               ))
             )}
@@ -276,6 +294,8 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
           variant="outline"
           onClick={generateCSV}
           disabled={!attendanceRecords || attendanceRecords.length === 0}
+          className="min-w-[140px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-300"
+          size="lg"
         >
           <Download className="h-4 w-4 mr-2" />
           Download CSV

@@ -1,3 +1,4 @@
+// tracker/page.tsx
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -26,6 +27,8 @@ import {
   deleteDatabase,
 } from "@/utils/indexedDB";
 import StorageDebugger from "../components/StorageDebugger";
+import { correctData, Correction } from "./components/Corrector"; // Import correctData utility function
+import BrowserWarning from "./components/BrowserWarning";
 
 interface AttendanceRecord {
   id: string;
@@ -67,11 +70,13 @@ export default function ScannerPage() {
 
   const playSuccessSound = useCallback(() => {
     const audio = new Audio("/success.mp3");
+    audio.src = "/success.mp3"; // Ensure src is set before play
     audio.play().catch(console.error);
   }, []);
 
   const playErrorSound = useCallback(() => {
     const audio = new Audio("/error.mp3");
+    audio.src = "/error.mp3"; // Ensure src is set before play
     audio.play().catch(console.error);
   }, []);
 
@@ -154,47 +159,66 @@ export default function ScannerPage() {
         return;
       }
 
-      // Generate a new scan record
-      const newScan: ScanRecord = {
-        id: Date.now().toString(),
-        userID: decodedData.userID,
+      const correctedData = correctData({
+        userId: decodedData.userID,
         name: decodedData.name,
         section: decodedData.section,
+      });
+
+      const newScan: ScanRecord = {
+        id: Date.now().toString(),
+        userID: correctedData.userId,
+        name: correctedData.name,
+        section: correctedData.section,
         timestamp: new Date().toLocaleString(),
         type: data.type,
       };
 
-      // Add the new scan record directly to IndexedDB
-      await addItem("scans", newScan);  // Store it in "scans" (not used in attendance directly)
+      // Check for existing attendance record in IndexedDB
+      const storedAttendanceRecords = (await getAllItems("attendance")) as AttendanceRecord[];
+      const existingRecord = storedAttendanceRecords.find(
+        (record) =>
+          record.userID === correctedData.userId &&
+          record.name === correctedData.name &&
+          record.section === correctedData.section
+      );
 
-      // Add the scan directly to the "attendance" store (without conditions)
-      const newAttendanceRecord: AttendanceRecord = {
-        id: newScan.id, // Using scan id as attendance id (or you can use userID, but using id from scan for simplicity)
-        userID: decodedData.userID,
-        name: decodedData.name,
-        section: decodedData.section,
-        timeIn: data.type === "in" ? newScan.timestamp : undefined,
-        timeOut: data.type === "out" ? newScan.timestamp : undefined,
-      };
+      let updatedRecord: AttendanceRecord;
+      if (existingRecord) {
+        // Update existing record
+        updatedRecord = {
+          ...existingRecord,
+          timeIn: data.type === "in" ? newScan.timestamp : existingRecord.timeIn,
+          timeOut: data.type === "out" ? newScan.timestamp : existingRecord.timeOut,
+        };
+      } else {
+        // Create new record
+        updatedRecord = {
+          id: newScan.id,
+          userID: correctedData.userId,
+          name: correctedData.name,
+          section: correctedData.section,
+          timeIn: data.type === "in" ? newScan.timestamp : undefined,
+          timeOut: data.type === "out" ? newScan.timestamp : undefined,
+        };
+      }
 
-      await addItem("attendance", newAttendanceRecord);  // Save directly to "attendance"
+      // Save to IndexedDB
+      await addItem("attendance", updatedRecord);
+      await addItem("scans", newScan);
 
-      // Update recent scans state to show the latest scans in the UI
-      setRecentScans((prevScans) => [newScan, ...prevScans].slice(0, 5));
+      // Update local state
+      setAttendanceRecords((prev) => [...prev.filter((rec) => rec.id !== updatedRecord.id), updatedRecord]);
+      setRecentScans((prev) => [newScan, ...prev.slice(0, 4)]);
 
-      // Play success sound and show toast message
       playSuccessSound();
-      toast.success(`Successfully scanned: ${decodedData.name}`);
+      toast.success(`Successfully scanned: ${correctedData.name}`);
     } catch (error) {
       console.error("Error processing QR code:", error);
       toast.error("Error processing QR code");
       playErrorSound();
     }
   };
-
-
-
-
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -221,112 +245,122 @@ export default function ScannerPage() {
   const showStorageDebugger = pathname === "/tracker";
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{eventName}</h1>
-          <p className="text-muted-foreground">Tracker: {trackerName}</p>
-          <p className="text-muted-foreground">Section: {trackerSection}</p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowLogoutDialog(true)}
-          disabled={isLoggingOut}
-        >
-          {isLoggingOut ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Signing Out...
-            </>
-          ) : (
-            <>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </>
-          )}
-        </Button>
-      </div>
-
-      <Tabs defaultValue="attendance" onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="attendance">Take Attendance</TabsTrigger>
-          <TabsTrigger value="records">Attendance Records</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="attendance">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
-              <QRScanner
-                ref={qrScannerRef}
-                eventId="current-event"
-                onScanSuccess={handleScanSuccess}
-              />
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Scans</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentScans.map((scan) => (
-                    <div
-                      key={scan.id}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium">{scan.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {scan.section}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs ${
-                            scan.type === "in"
-                              ? "bg-green-500/10 text-green-500"
-                              : "bg-blue-500/10 text-blue-500"
-                          }`}
-                        >
-                          Time {scan.type === "in" ? "In" : "Out"}
-                        </span>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {scan.timestamp}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {recentScans.length === 0 && (
-                    <div className="text-center text-muted-foreground">
-                      No recent scans
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+    <>
+      <BrowserWarning />
+      <div className="container mx-auto p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{eventName}</h1>
+            <p className="text-muted-foreground">Tracker: {trackerName}</p>
+            <p className="text-muted-foreground">Section: {trackerSection}</p>
           </div>
-        </TabsContent>
+          <Button
+            variant="outline"
+            onClick={() => setShowLogoutDialog(true)}
+            disabled={isLoggingOut}
+            className="min-w-[140px] bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg shadow-red-500/25 transition-all duration-300"
+            size="lg"
+          >
+            {isLoggingOut ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Signing Out...
+              </>
+            ) : (
+              <>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </>
+            )}
+          </Button>
+        </div>
 
-        <TabsContent value="records">
-          <AttendanceRecordTable attendanceRecords={attendanceRecords} />
-        </TabsContent>
-      </Tabs>
+        <Tabs defaultValue="attendance" onValueChange={handleTabChange}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="attendance">Take Attendance</TabsTrigger>
+            <TabsTrigger value="records">Attendance Records</TabsTrigger>
+          </TabsList>
 
-      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Are you sure you want to log out?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              You will be logged out of this session.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction onClick={handleLogout}>Log out</AlertDialogAction>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-        </AlertDialogContent>
-      </AlertDialog>
-      {showStorageDebugger && <StorageDebugger />}
-    </div>
+          <TabsContent value="attendance">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-4">
+                <QRScanner
+                  ref={qrScannerRef}
+                  eventId="current-event"
+                  onScanSuccess={handleScanSuccess}
+                />
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Scans</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentScans.map((scan) => (
+                      <div
+                        key={scan.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium">{scan.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {scan.section}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs ${
+                              scan.type === "in"
+                                ? "bg-green-500/10 text-green-500"
+                                : "bg-red-500/10 text-red-500"
+                            }`}
+                          >
+                            Time {scan.type === "in" ? "In" : "Out"}
+                          </span>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {scan.timestamp}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {recentScans.length === 0 && (
+                      <div className="text-center text-muted-foreground">
+                        No recent scans
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="records">
+            <AttendanceRecordTable attendanceRecords={attendanceRecords} />
+          </TabsContent>
+        </Tabs>
+
+        <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Are you sure you want to log out?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                You will be logged out of this session. All records will also be removed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogAction
+              onClick={handleLogout}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg shadow-red-500/25 transition-all duration-300"
+            >
+              Log out
+            </AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          </AlertDialogContent>
+        </AlertDialog>
+        {showStorageDebugger && <StorageDebugger />}
+      </div>
+    </>
   );
 }

@@ -1,29 +1,44 @@
-  {
-    "compilerOptions": {
-      "target": "es2020",
-      "lib": ["dom", "dom.iterable", "esnext"],
-      "allowJs": true,
-      "skipLibCheck": true,
-      "strict": true,
-      "noEmit": false,
-      "noImplicitAny": true,
-      "esModuleInterop": true,
-      "module": "esnext",
-      "moduleResolution": "node",
-      "resolveJsonModule": true,
-      "isolatedModules": true,
-      "jsx": "preserve",
-      "incremental": true,
-      "baseUrl": ".",
-      "paths": {
-        "@/*": ["./*"]
-      },
-      "plugins": [
-        {
-          "name": "next"
-        }
-      ]
+{
+  "compilerOptions": {
+    "target": "es2020", // Target ES2020
+    "lib": ["dom", "dom.iterable", "esnext"], // Include DOM and modern features
+    "allowJs": true, // Allow JavaScript files
+    "checkJs": false, // Avoid processing JavaScript files for errors
+    "skipLibCheck": true, // Skip type checking of declaration files
+    "strict": true, // Enable strict type-checking
+    "noImplicitAny": true, // Ensure all types are defined
+    "module": "esnext", // Use ESNext modules
+    "moduleResolution": "node", // Resolve modules like Node.js
+    "resolveJsonModule": true, // Allow importing JSON files
+    "isolatedModules": true, // Isolate module transpilation
+    "jsx": "preserve", // Preserve JSX for Next.js to handle
+    "incremental": true, // Enable incremental builds
+    "noEmit": false, // Enable emitting of compiled files
+    "outDir": "./dist", // Output compiled files into a dedicated folder
+    "rootDir": ".", // Set the root directory of source files
+    "esModuleInterop": true, // Ensure compatibility with ESModules
+    "baseUrl": ".", // Set base URL for module resolution
+    "paths": {
+      "@/*": ["./*"], // Alias for project root
+      "@lib/*": ["lib/*"] // Alias for `lib` directory
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    "exclude": ["node_modules"]
-  }
+    "plugins": [
+      {
+        "name": "next" // Next.js specific plugin
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts", // Next.js environment declarations
+    "**/*.ts", // Include all TypeScript files
+    "**/*.tsx", // Include all TypeScript React files
+    ".next/types/**/*.ts", // Include Next.js types
+    "**/*.d.ts" // Include declaration files
+  ],
+  "exclude": [
+    "node_modules", // Exclude `node_modules`
+    "dist", // Exclude compiled output folder
+    "public", // Exclude static files (e.g., worker scripts in `public`)
+    "lib/qr-main.js" // Exclude this specific file if it's precompiled
+  ]
+}

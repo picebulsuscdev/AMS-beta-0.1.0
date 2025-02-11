@@ -1,5 +1,4 @@
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 @layer base {
@@ -102,4 +101,14 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+video-element {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for border and shadow */
+}
+
+.video-element.focusing {
+  border-color: #00ff00; /* Green outline on focus */
+  border-width: 4px; /* Make outline thicker */
+  box-shadow: 0 0 10px #00ff00; /* Optional: Add a subtle shadow for more visual pop */
 }

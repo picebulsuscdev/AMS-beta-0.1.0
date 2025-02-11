@@ -12,7 +12,11 @@ export function decryptHash(hash: string): DecodedQRData | null {
     const decrypted = CryptoJS.AES.decrypt(hash, key).toString(
       CryptoJS.enc.Utf8,
     );
-    return JSON.parse(decrypted) as DecodedQRData;
+    //console.log("Decrypted string:", decrypted); // Add logging
+    const parsedData = JSON.parse(decrypted);
+    parsedData.userID = parsedData.userId; // Rename userId to userID
+    delete parsedData.userId; // Remove the original userId key
+    return parsedData as DecodedQRData;
   } catch (error) {
     console.error("Failed to decrypt hash:", error);
     return null;
