@@ -24,6 +24,7 @@ export default function ChangelogPage() {
                 <h3 className="text-lg font-semibold text-gray-700 mb-3">New Features</h3>
                 <ul className="list-disc list-inside space-y-2 text-gray-600">
                   <li>Introduced the <strong>Changelog</strong> page to track release updates.</li>
+                  <li>Introduced the <strong>PDf</strong> format when exporting records.</li>
                 </ul>
                 <h3 className="text-lg font-semibold text-gray-700 mt-6 mb-3">Fixes</h3>
                 <ul className="list-disc list-inside space-y-2 text-gray-600">
