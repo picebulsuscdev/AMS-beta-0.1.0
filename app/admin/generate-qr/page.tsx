@@ -314,6 +314,7 @@ export default function GenerateQRPage() {
           <Button
             variant="outline"
             size="icon"
+            className="bg-muted/50 text-muted-foreground"
             onClick={() => router.push("/onboarding/administrator")}
           >
             <HelpCircle className="h-4 w-4" />
@@ -327,12 +328,13 @@ export default function GenerateQRPage() {
               <div className="flex items-center justify-between">
                 <CardTitle>Student Data</CardTitle>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleDownloadTemplate}>
+                  <Button variant="outline" className="bg-muted/50 text-muted-foreground" onClick={handleDownloadTemplate}>
                     <Download className="h-4 w-4 mr-2" />
                     Template
                   </Button>
                   <Button
                     variant="outline"
+                    className="bg-muted/50 text-muted-foreground"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="h-4 w-4 mr-2" />
@@ -363,7 +365,7 @@ export default function GenerateQRPage() {
                   value={newSection}
                   onChange={(e) => setNewSection(e.target.value)}
                 />
-                <Button onClick={handleAddStudent}>
+                <Button className="bg-blue-500/10 text-blue-500" onClick={handleAddStudent}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
@@ -417,9 +419,10 @@ export default function GenerateQRPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="text-red-500"
                             onClick={() => handleDeleteStudent(student.userId)}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </td>
                       </tr>
@@ -433,7 +436,7 @@ export default function GenerateQRPage() {
                 variant="outline"
                 onClick={handleClearAll}
                 disabled={students.length === 0}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all duration-300"
               >
                 Clear All
               </Button>
@@ -479,7 +482,7 @@ export default function GenerateQRPage() {
               {buttonState === "idle" ? (
                 <div className="w-full">
                   <Button
-                    className="w-full"
+                    className="w-full bg-blue-500 text-white"
                     disabled={students.length === 0}
                     onClick={generateQRCodes}
                   >

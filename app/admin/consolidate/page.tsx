@@ -327,6 +327,7 @@ export default function ConsolidatePage() {
           <Button
             variant="outline"
             size="icon"
+            className="bg-muted/50 text-muted-foreground"
             onClick={() => router.push("/admin/dashboard")}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -334,6 +335,7 @@ export default function ConsolidatePage() {
           <Button
             variant="outline"
             size="icon"
+            className="bg-muted/50 text-muted-foreground"
             onClick={() => router.push("/onboarding/administrator")}
           >
             <HelpCircle className="h-4 w-4" />
@@ -369,7 +371,7 @@ export default function ConsolidatePage() {
             </CardContent>
           </Card>
           <Button
-            className="w-full mt-4"
+            className="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-300"
             disabled={
               !consolidationFile || !attendanceFiles.length || isConsolidating
             }
@@ -404,6 +406,7 @@ export default function ConsolidatePage() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    className="text-muted-foreground"
                     onClick={handleEditEventName}
                   >
                     <Edit className="h-4 w-4" />
@@ -411,7 +414,7 @@ export default function ConsolidatePage() {
                 </div>
                 {consolidated && (
                   <Button
-                    variant="outline"
+                    variant="outline" className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg shadow-green-500/25 transition-all duration-300"
                     size="icon"
                     onClick={downloadConsolidated}
                     disabled={isDownloading}
@@ -468,6 +471,7 @@ export default function ConsolidatePage() {
             <div className="mt-4 flex justify-end">
               <Button
                 variant="outline"
+                className="bg-muted/50 text-muted-foreground"
                 onClick={handleEventNameSubmit}
               >
                 Apply

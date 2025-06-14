@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useCheckAdminAuthentication } from "@/utils/auth";
+import { APP_VERSION } from "@/lib/constants"; // Import APP_VERSION
 
 export default function AdminLoginPage() {
   const authStatus = useCheckAdminAuthentication();
@@ -84,7 +85,7 @@ export default function AdminLoginPage() {
               variant="outline"
               className="text-yellow-500 border-yellow-500 mt-1 inline-block"
             >
-              v0.1.0-beta
+              {APP_VERSION}
             </Badge>
           </div>
 
@@ -127,7 +128,7 @@ export default function AdminLoginPage() {
                 {loginError}
               </p>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-300" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging In

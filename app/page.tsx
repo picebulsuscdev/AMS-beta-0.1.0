@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { initDB, addItem, getAllItems } from "@/utils/indexedDB";
 import { Badge } from "@/components/ui/badge"; // Import the Badge component
+import { APP_VERSION } from "@/lib/constants"; // Import APP_VERSION
 import BrowserReminder from "@/components/ui/browser-reminder";
 
 export default function RegisterPage() {
@@ -105,7 +106,7 @@ export default function RegisterPage() {
                 variant="outline"
                 className="text-yellow-500 border-yellow-500 mt-1 inline-block"
               >
-                v0.2.0-exp
+                {APP_VERSION}
               </Badge>
             </div>
 

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { initDB, getAllItems } from "@/utils/indexedDB";
 import { useMediaQuery } from "usehooks-ts";
 import { toast } from "sonner";
+import { formatTimeTo12Hour } from "@/utils/format";
 
 interface AttendanceRecord {
   id: string;
@@ -124,45 +125,6 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
     return attendanceRecords?.filter((record) => record.timeOut).length || 0;
   }, [attendanceRecords]);
 
-  const generateCSV = async () => {
-    if (!attendanceRecords || attendanceRecords.length === 0) {
-      toast.error("No attendance records to download.");
-      return;
-    }
-
-    toast.loading("Generating CSV...", { id: "csv-download" });
-
-    const csvHeader = `id,User ID,Name,Section,timeIn,timeOut,validator.piceamslogs`;
-    const csvRows = attendanceRecords
-      .map((record) => {
-        const formattedTimeIn = record.timeIn
-          ? new Date(record.timeIn).toLocaleString().replace(",", " |")
-          : "null";
-        const formattedTimeOut = record.timeOut
-          ? new Date(record.timeOut).toLocaleString().replace(",", " |")
-          : "null";
-
-        return `${record.id},${record.userID},${record.name},${record.section},${formattedTimeIn},${formattedTimeOut},`;
-      })
-      .join("\n");
-
-    const csvData = `${csvHeader}\n${csvRows}`;
-
-    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    const fileName = `${trackerSection || "Records"} - ${trackerName || "Attendance"}.csv`;
-    link.download = fileName;
-    console.log("generateCSV - File name:", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    toast.success("CSV generated successfully!", { id: "csv-download" });
-  };
-
   return (
     <div className="space-y-4">
       <Input
@@ -281,25 +243,13 @@ const AttendanceRecordTable: React.FC<AttendanceRecordTableProps> = ({
                   <td className="text-center py-2 px-3">{record.userID}</td>
                   <td className="text-left py-2 px-3">{record.name}</td>
                   <td className="text-center py-2 px-3">{record.section}</td>
-                  <td className="text-center py-2 px-3">{record.timeIn}</td>
-                  <td className="text-center py-2 px-3">{record.timeOut}</td>
+                  <td className="text-center py-2 px-3">{formatTimeTo12Hour(record.timeIn)}</td>
+                  <td className="text-center py-2 px-3">{formatTimeTo12Hour(record.timeOut)}</td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
-      </div>
-      <div className="mt-4 flex justify-end space-x-2">
-        <Button
-          variant="outline"
-          onClick={generateCSV}
-          disabled={!attendanceRecords || attendanceRecords.length === 0}
-          className="min-w-[140px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-300"
-          size="lg"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Download CSV
-        </Button>
       </div>
     </div>
   );

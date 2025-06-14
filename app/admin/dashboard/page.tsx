@@ -59,7 +59,7 @@ export default function AdminDashboard() {
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           <Card
-            className={`hover:bg-accent/50 transition-colors cursor-pointer ${activeButton && activeButton !== "qr" ? "pointer-events-none bg-accent/50" : ""}`}
+            className={`hover:bg-gray-100 transition-colors cursor-pointer ${activeButton && activeButton !== "qr" ? "pointer-events-none bg-white" : ""}`}
             onClick={() => handleNavigate("/admin/generate-qr")}
           >
             <CardContent className="flex flex-col items-center justify-center p-12 text-center space-y-4">
@@ -76,8 +76,8 @@ export default function AdminDashboard() {
           </Card>
 
           <Card
-            className={`hover:bg-accent/50 transition-colors cursor-pointer ${activeButton && activeButton !== "consolidate" ? "pointer-events-none bg-accent/50" : ""}`}
-            onClick={() => handleNavigate("/admin/consolidate")}
+            className={`hover:bg-gray-100 transition-colors cursor-pointer ${activeButton && activeButton !== "consolidate" ? "pointer-events-none bg-white" : ""}`}
+            onClick={() => toast.error("This feature is outdated. You may not be able to proceed.")}
           >
             <CardContent className="flex flex-col items-center justify-center p-12 text-center space-y-4">
               {activeButton === "consolidate" && isLoading ? (
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
           </Card>
         </div>
         <div className="flex justify-center mt-8">
-          <Button variant="outline" onClick={() => setShowLogoutDialog(true)}>
+          <Button variant="outline" className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg shadow-red-500/25 transition-all duration-300" onClick={() => setShowLogoutDialog(true)}>
             Sign Out
           </Button>
         </div>
