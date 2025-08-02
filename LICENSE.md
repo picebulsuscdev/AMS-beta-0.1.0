@@ -1,8 +1,8 @@
 # License – AMS (Attendance Monitoring System)
 
-Copyright (c) 2025 Edd Rich Marcos
+Copyright (c) 2025 Edd Rich B. Marcos
 
-This software is developed and maintained solely by Edd Rich Marcos, originally created for the Philippine Institute of Civil Engineers – Bulacan State University Student Chapter (PICE BulSU-SC) during your term of service.
+This software is developed and maintained solely by Edd Rich B. Marcos, originally created for the Philippine Institute of Civil Engineers – Bulacan State University Student Chapter (PICE BulSU-SC) during your term of service.
 
 ## Permissions
 
