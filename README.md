@@ -1,4 +1,4 @@
- PICE BulSU-SC Attendance Monitoring System (AMS)
+# PICE BulSU-SC Attendance Monitoring System (AMS)
 
 ## Overview
 
